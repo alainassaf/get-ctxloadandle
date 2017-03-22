@@ -24,7 +24,8 @@ SYNTAX<br>
 DESCRIPTION<br>
     Gathers server load, assigned LE, and active and disconnected sessions and emails a HTLM formatted report. It is recommended that this script be run as a Citrix admin. In addition, the Citrix Powershell modules should be installed
 
-PARAMETERS<br>
+PARAMETERS
+
     -DeliveryControllers <Object>
         Required parameter. Which Citrix Delivery Controller(s) (farm) to publish applicaiton with
         
