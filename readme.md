@@ -24,7 +24,7 @@ SYNTAX<br>
 DESCRIPTION<br>
     Gathers server load, assigned LE, and active and disconnected sessions and emails a HTLM formatted report. It is recommended that this script be run as a Citrix admin. In addition, the Citrix Powershell modules should be installed
 
-PARAMETERS
+PARAMETERS<br>
     -DeliveryControllers <Object>
         Required parameter. Which Citrix Delivery Controller(s) (farm) to publish applicaiton with
         
@@ -40,9 +40,10 @@ PARAMETERS
         OutBuffer, PipelineVariable, and OutVariable. For more information, see 
         about_CommonParameters (http://go.microsoft.com/fwlink/?LinkID=113216). 
     
-INPUTS
+INPUTS<br>
     None
-OUTPUTS
+	
+OUTPUTS<br>
     An HTA file is created and used for the report email. The HTA file is saved to the $TEMP environment variable
     
 NOTES
