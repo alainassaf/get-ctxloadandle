@@ -9,6 +9,7 @@ I'd like to highlight the posts that helped me write this scrip below.
 * [test-port function] http://irl33t.com/blog/2011/03/powershell-script-connect-rdp-ps1
 * http://carlwebster.com/finding-offline-servers-using-powershell-part-1-of-4/
 * [get-uptime function] https://gallery.technet.microsoft.com/scriptcenter/Get-Uptime-PowerShell-eb98896f
+* http://matthewyarlett.blogspot.com/2014/10/powershell-array-to-comma-separated.html
 
 # get-help .\get-ctxLoadAndLE.ps1 -full
 
@@ -50,7 +51,7 @@ OUTPUTS<br>
 NOTES
     
         NAME: get-ctxLoadAndLE.ps1
-        VERSION: 1.09
+        VERSION: 1.15
         CHANGE LOG - Version - When - What - Who
         1.00 - 01/11/2012 -Initial script - Alain Assaf
         1.01 - 01/18/2012 - Changed way I get user sessions because it was timing out - Alain Assaf
@@ -66,8 +67,14 @@ NOTES
         1.08 - 12/08/2016 - Changed Deliverycontrollers and added a test to ensure one is up before quering farm - 
         Alain Assaf
         1.09 - 03/21/2017 - updated modules to newer versions. Removed unused code - Alain Assaf
+		1.10 - 03/21/2016 - Used ctxModules to import functions and move them out of script - Alain Assaf
+		1.11 - 03/21/2016 - Removed some links that are for functions. See ctxModules for the links - Alain Assaf
+		1.12 - 03/21/2016 - Removed unused code - Alain Assaf
+		1.13 - 03/28/2016 - Replaced Logon state column with Worker Group - Alain Assaf
+		1.14 - 03/28/2016 - Added steps to deal with a server in more than one Worker Group - Alain Assaf
+		1.15 - 04/04/2016 - Removed ctxmodules and put functions into script due to issues on server - Alain Assaf
         AUTHOR: Alain Assaf
-        LASTEDIT: March 21, 2017
+        LASTEDIT: April 21, 2017
     
     -------------------------- EXAMPLE 1 --------------------------
     
