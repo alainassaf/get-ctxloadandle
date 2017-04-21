@@ -6,7 +6,7 @@
 .PARAMETER DeliveryControllers
  Required parameter. Which Citrix Delivery Controller(s) (farm) to publish applicaiton with 
 .EXAMPLE
- PS C:\PSScript &amp;gt; .\get-ctxLoadAndLE.ps1
+ PS C:\PSScript> .\get-ctxLoadAndLE.ps1
  
  Will use all default values.
  Will query servers in the default Farm and create an HTA file and optionally email the report.
@@ -19,7 +19,7 @@
  An HTA file is created and used for the report email. The HTA file is saved to the $TEMP environment variable
 .NOTES
  NAME: get-ctxLoadAndLE.ps1
- VERSION: 1.09
+ VERSION: 1.15
  CHANGE LOG - Version - When - What - Who
  1.00 - 01/11/2012 -Initial script - Alain Assaf
  1.01 - 01/18/2012 - Changed way I get user sessions because it was timing out - Alain Assaf
@@ -32,8 +32,14 @@
  1.07 - 12/06/2016 - Changed email routine to iterate through array of emails - Alain Assaf
  1.08 - 12/08/2016 - Changed Deliverycontrollers and added a test to ensure one is up before quering farm - Alain Assaf
  1.09 - 03/21/2017 - updated modules to newer versions. Removed unused code - Alain Assaf
+ 1.10 - 03/21/2016 - Used ctxModules to import functions and move them out of script - Alain Assaf
+ 1.11 - 03/21/2016 - Removed some links that are for functions. See ctxModules for the links - Alain Assaf
+ 1.12 - 03/21/2016 - Removed unused code - Alain Assaf
+ 1.13 - 03/28/2016 - Replaced Logon state column with Worker Group - Alain Assaf
+ 1.14 - 03/28/2016 - Added steps to deal with a server in more than one Worker Group - Alain Assaf
+ 1.15 - 04/04/2016 - Removed ctxmodules and put functions into script due to issues on server - Alain Assaf
  AUTHOR: Alain Assaf
- LASTEDIT: March 21, 2017
+ LASTEDIT: April 04, 2017
 .LINK
  http://www.linkedin.com/in/alainassaf/
  http://wagthereal.com
@@ -43,6 +49,7 @@
  [test-port function] http://irl33t.com/blog/2011/03/powershell-script-connect-rdp-ps1
  http://carlwebster.com/finding-offline-servers-using-powershell-part-1-of-4/
  [get-uptime function] https://gallery.technet.microsoft.com/scriptcenter/Get-Uptime-PowerShell-eb98896f
+ http://matthewyarlett.blogspot.com/2014/10/powershell-array-to-comma-separated.html
 #>
 Param(
  [parameter(Position = 0, Mandatory=$True )]
@@ -59,8 +66,34 @@ $sendto = "CITRIXTEAM@DOMAIN.LOCAL"
 $from = "citrix@DOMAIN.LOCAL"
 $SMTPsrv = "SMTP.DOMAIN.LOCAL" #Changed to your local SMTP server for email report
 
-### START FUNCTION: get-mysnapin ###################################################
+### START FUNCTION: get-mysnapin ##############################################
 Function Get-MySnapin {
+<#
+    .SYNOPSIS
+    Checks for a PowerShell Snapin(s) and imports it if available, otherwise it will display a warning and exit.
+    .DESCRIPTION
+    Checks for a PowerShell Snapin(s) and imports it if available, otherwise it will display a warning and exit.
+    .PARAMETER snapins
+    Required parameter. List of PSSnapins separated by commas.
+    .INPUTS
+    None
+    .OUTPUTS
+    None
+    .EXAMPLE
+    PS> get-MySnapin PSSNAPIN
+    Checks system for installed PSSNAPIN and imports it if available.
+    .LINK
+    http://www.linkedin.com/in/alainassaf/
+    http://wagthereal.com
+    https://github.com/alainassaf/get-mysnapin
+    .NOTES
+    NAME        :  Get-MySnapin
+    VERSION     :  1.00
+    CHANGE LOG - Version - When - What - Who
+    1.00 - 02/13/2017 - Initial script - Alain Assaf
+    LAST UPDATED:  02/13/2017
+    AUTHOR      :  Alain Assaf
+#>
     Param([string]$snapins)
         $ErrorActionPreference= 'silentlycontinue'
         foreach ($snap in $snapins.Split(",")) {
@@ -77,7 +110,7 @@ Function Get-MySnapin {
             }                                                                                                                                                                  
         }
 }
-### END FUNCTION: get-mysnapin #####################################################
+### END FUNCTION: get-mysnapin ################################################
 
 ### START FUNCTION: test-port ######################################################
 # Function to test RDP availability
@@ -100,8 +133,34 @@ function Test-Port{
 }
 ### END FUNCTION: test-port ########################################################
 
-### START FUNCTION: get-uptime ######################################################
+### START FUNCTION: get-uptime ################################################
 Function Get-Uptime { 
+<#
+    .SYNOPSIS
+    Gets uptime of server.
+    .DESCRIPTION
+    Gets uptime of server.
+    .PARAMETER ComputerName
+    Optional parameter. Server to get uptime from
+    .INPUTS
+    None
+    .OUTPUTS
+    None
+    .EXAMPLE
+    PS> Get-Uptime SERVERNAME
+    Test TCP connection to SERVERNAME over port 3389 with a 300 millisecond timeout
+    .LINK
+    http://www.linkedin.com/in/alainassaf/
+    http://wagthereal.com
+    https://gallery.technet.microsoft.com/scriptcenter/Get-Uptime-PowerShell-eb98896f
+    .NOTES
+    NAME        :  Get-Uptime
+    VERSION     :  1.00
+    CHANGE LOG - Version - When - What - Who
+    1.00 - 02/13/2017 - Initial script - Alain Assaf
+    LAST UPDATED:  02/13/2017
+    AUTHOR      :  Alain Assaf
+#>
     [CmdletBinding()] 
     param ( 
         [Parameter(Mandatory=$false, 
@@ -139,7 +198,7 @@ Function Get-Uptime {
     } 
     end{} 
 }
-### END FUNCTION: get-uptime ########################################################
+### END FUNCTION: get-uptime ##################################################
 
 ### START FUNCTION: get-xmlbroker #############################################
 Function Get-xmlbroker { 
@@ -225,6 +284,13 @@ foreach ($srv in $AllXAServers) {
     if ($OnlineServers -contains $ctxsrv) {
         $srvload = get-xaserverload -ComputerName $DeliveryController -servername $ctxsrv | select -Property ServerName,Load
         $srvinfo = get-xaserver -ComputerName $DeliveryController -servername $ctxsrv | select -Property LogOnMode,LogOnsEnabled
+        $srvwg = (Get-XAWorkerGroup -ComputerName $DeliveryController -ServerName $ctxsrv).Workergroupname
+        $wg = $null
+        if ($srvwg.count -gt 1) {
+            $srvwg | %{$wg += ( $( if($wg){", "}) + $_)}
+        } else {
+            $wg = $srvwg
+        }
         $srvactive = @($ctxsrvSessions | where {$_.Servername -eq $ctxsrv -and $_.State -eq 'Active'}).count
         $srvdisconn = @($ctxsrvSessions | where {$_.Servername -eq $ctxsrv -and $_.State -eq 'Disconnected'}).count
         $srvuptime = get-uptime -name $ctxsrv
@@ -235,7 +301,7 @@ foreach ($srv in $AllXAServers) {
         $objctxsrv | Add-Member -type NoteProperty -name Active -value $srvactive
         $objctxsrv | Add-Member -type NoteProperty -name Disconnected -value $srvdisconn
         $objctxsrv | Add-Member -type NoteProperty -name 'Logon Mode' -value $srvinfo.LogOnMode.ToString()
-        $objctxsrv | Add-Member -type NoteProperty -name 'Logons Enabled' -value $srvinfo.LogOnsEnabled.ToString()
+        $objctxsrv | Add-Member -type NoteProperty -name 'Worker Group' -value $wg
         $objctxsrv | Add-Member -type NoteProperty -name 'Boot Time' -value ($srvuptime.BootTime).ToString()
         $tmpuptime = $srvuptime.Uptime.Days.ToString() + " days " + $srvuptime.Uptime.hours.ToString() + ":" + $srvuptime.Uptime.Minutes + " hours"  
         $objctxsrv | Add-Member -type NoteProperty -name 'Uptime' -value $tmpuptime
@@ -249,7 +315,7 @@ foreach ($srv in $AllXAServers) {
         $objctxsrv | Add-Member -type NoteProperty -name Active -value $null
         $objctxsrv | Add-Member -type NoteProperty -name Disconnected -value $null
         $objctxsrv | Add-Member -type NoteProperty -name 'Logon Mode' -value $null
-        $objctxsrv | Add-Member -type NoteProperty -name 'Logons Enabled' -value $null
+        $objctxsrv | Add-Member -type NoteProperty -name 'Worker Group' -value $null
         $objctxsrv | Add-Member -type NoteProperty -name 'Boot Time' -value $null
         $objctxsrv | Add-Member -type NoteProperty -name 'Uptime' -value $null
         $finalout += $objctxsrv
@@ -283,8 +349,10 @@ if(Valor == "OFFLINE"){
 </script>
 '
 
+$finalout = $finalout | sort 'Worker Group'
+
 #Uncomment below to email a report
-#$title = "XenApp DASHBOARD"
+$title = "XenApp DASHBOARD"
 #$body = $finalout | ConvertTo-Html -head $head -body $header -title $title
 #$body = $finalout | ConvertTo-Html -head $head -title $title
  
@@ -307,5 +375,5 @@ if(Valor == "OFFLINE"){
 #}
  
 #Uncomment to output the results in an HTA file to view in a browser
-#$finalout | ConvertTo-Html -head $head -title $title | out-file $env:temp\report.hta
-#ii $env:temp\report.hta
+$finalout | ConvertTo-Html -head $head -title $title | out-file $env:temp\report.hta
+ii $env:temp\report.hta
