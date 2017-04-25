@@ -93,7 +93,7 @@ NOTES
 # Legal and Licensing
 The get-ctxLoadAndLE.ps1 script is licensed under the [MIT license][].
 
-[MIT license]: LICENSE
+[MIT license]: LICENSE.md
 
 # Want to connect?
 * LinkedIn - https://www.linkedin.com/in/alainassaf
