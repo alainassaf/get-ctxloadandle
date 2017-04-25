@@ -1,7 +1,7 @@
 # get-ctxLoadAndLE
 Gathers server load, assigned LE, and active and disconnected sessions and emails a HTLM formatted report.
 
-#Contributions to this script
+# Contributions to this script
 I'd like to highlight the posts that helped me write this scrip below.
 * http://powershell.com/cs/blogs/ebook/archive/2008/10/23/chapter-4-arrays-and-hashtables.aspx
 * http://technet.microsoft.com/en-us/library/ff730946.aspx
